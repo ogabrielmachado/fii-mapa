@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
 import L from 'leaflet'
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 
 const API = 'https://fii-mapa-worker.gabrielmachado.workers.dev'
 
@@ -34,6 +35,12 @@ type Imovel = {
   estado: string
 }
 
+type Historico = {
+  data_referencia: string
+  total_imoveis: number
+  area_total: number
+}
+
 type FundoDetalhe = {
   cnpj: string
   nome: string
@@ -46,11 +53,13 @@ type FundoDetalhe = {
 export default function FundoPage({ cnpj, onVoltar }: { cnpj: string; onVoltar: () => void }) {
   const [fundo, setFundo]     = useState<FundoDetalhe | null>(null)
   const [imoveis, setImoveis] = useState<Imovel[]>([])
+  const [historico, setHistorico] = useState<Historico[]>([])
   const [busca, setBusca]     = useState('')
 
   useEffect(() => {
     fetch(`${API}/fundos/${encodeURIComponent(cnpj)}`).then(r => r.json()).then(setFundo)
     fetch(`${API}/fundos/${encodeURIComponent(cnpj)}/imoveis`).then(r => r.json()).then(setImoveis)
+    fetch(`${API}/fundos/${encodeURIComponent(cnpj)}/historico`).then(r => r.json()).then(setHistorico)
   }, [cnpj])
 
   const imoveisFiltrados = imoveis.filter(im =>
@@ -113,6 +122,46 @@ export default function FundoPage({ cnpj, onVoltar }: { cnpj: string; onVoltar: 
                 </Marker>
               ))}
             </MapContainer>
+          </div>
+        )}
+
+        {/* Gráfico histórico */}
+        {historico.length > 1 && (
+          <div style={{ background: 'white', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '16px' }}>
+            <div style={{ fontSize: '13px', fontWeight: 600, color: '#0f172a', marginBottom: '16px' }}>
+              Evolução do portfólio
+            </div>
+            <ResponsiveContainer width="100%" height={200}>
+              <AreaChart data={historico} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="gradImoveis" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#2563eb" stopOpacity={0.15}/>
+                    <stop offset="95%" stopColor="#2563eb" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9"/>
+                <XAxis
+                  dataKey="data_referencia"
+                  tick={{ fontSize: 10, fill: '#94a3b8' }}
+                  tickFormatter={(v) => v.slice(0, 7)}
+                  interval="preserveStartEnd"
+                />
+                <YAxis tick={{ fontSize: 10, fill: '#94a3b8' }} allowDecimals={false}/>
+                <Tooltip
+                  contentStyle={{ fontSize: '12px', borderRadius: '8px', border: '1px solid #e2e8f0' }}
+                  labelFormatter={(v) => `Trimestre: ${v}`}
+                  formatter={(v: any) => [`${v} imóveis`, 'Portfólio']}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="total_imoveis"
+                  stroke="#2563eb"
+                  strokeWidth={2}
+                  fill="url(#gradImoveis)"
+                  dot={false}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
           </div>
         )}
 

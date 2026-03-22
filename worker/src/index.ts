@@ -88,6 +88,18 @@ app.get('/fundos/:cnpj', async (c) => {
   return c.json({ ...fundo, ...stats })
 })
 
+
+app.get('/fundos/:cnpj/historico', async (c) => {
+  const cnpj = c.req.param('cnpj')
+  const { results } = await c.env.DB.prepare(`
+    SELECT data_referencia, total_imoveis, area_total
+    FROM historico_portfolio
+    WHERE cnpj_fundo = ?
+    ORDER BY data_referencia ASC
+  `).bind(cnpj).all()
+  return c.json(results)
+})
+
 export default app
 
 app.get('/stats', async (c) => {
