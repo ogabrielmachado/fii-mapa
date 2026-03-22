@@ -1,0 +1,12 @@
+{
+  "name": "fii-mapa-worker",
+  "main": "src/index.ts",
+  "compatibility_date": "2025-01-01",
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "fii-db",
+      "database_id": "4f07ca5e-a8db-4e25-a383-62b793aa1970"
+    }
+  ]
+}
