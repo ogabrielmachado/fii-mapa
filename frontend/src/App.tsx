@@ -127,7 +127,7 @@ export default function App() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1 }}>
           <span style={{ fontSize: '20px' }}>🗺️</span>
           <div>
-            <strong style={{ fontSize: '15px', color: '#0f172a' }}>FII Mapa</strong>
+            <strong style={{ fontSize: '15px', color: '#0f172a' }}>Mapa FIIs</strong>
             <span style={{ fontSize: '11px', color: '#94a3b8', marginLeft: '6px', display: 'none' }} className="desktop-only">Imóveis de Fundos Imobiliários</span>
           </div>
           {stats && (
