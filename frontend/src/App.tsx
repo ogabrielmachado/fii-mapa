@@ -98,6 +98,7 @@ export default function App() {
   const [fundoDetalhe, setFundoDetalhe] = useState<Fundo | null>(null)
   const [imoveisFundo, setImoveisFundo] = useState<Imovel[]>([])
   const [menuAberto, setMenuAberto]   = useState(false)
+  const [sobreAberto, setSobreAberto] = useState(false)
 
   useEffect(() => {
     fetch(`${API}/fundos`).then(r => r.json()).then(setFundos)
@@ -148,7 +149,7 @@ export default function App() {
         <button
           onClick={() => setMenuAberto(!menuAberto)}
           style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', background: menuAberto ? '#f1f5f9' : 'white', cursor: 'pointer', fontSize: '13px', color: '#334155' }}>
-          ⚙️ Filtros {(filtroFundo || filtroTipo) && <span style={{ background: '#2563eb', color: 'white', borderRadius: '99px', padding: '1px 6px', fontSize: '10px' }}>●</span>}
+          ⓘ Sobre {(filtroFundo || filtroTipo) && <span style={{ background: '#2563eb', color: 'white', borderRadius: '99px', padding: '1px 6px', fontSize: '10px' }}>●</span>}
         </button>
       </div>
 
@@ -259,6 +260,50 @@ export default function App() {
           </div>
         )}
       </div>
+
+      {/* Modal Sobre */}
+      {sobreAberto && (
+        <div onClick={() => setSobreAberto(false)} style={{
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)',
+          zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px'
+        }}>
+          <div onClick={e => e.stopPropagation()} style={{
+            background: 'white', borderRadius: '16px', padding: '32px',
+            maxWidth: '420px', width: '100%', boxShadow: '0 20px 60px rgba(0,0,0,0.15)'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+              <div style={{ fontSize: '24px' }}>🗺️</div>
+              <button onClick={() => setSobreAberto(false)}
+                style={{ background: 'none', border: 'none', fontSize: '22px', cursor: 'pointer', color: '#94a3b8' }}>×</button>
+            </div>
+
+            <h2 style={{ fontSize: '20px', fontWeight: 600, color: '#0f172a', marginBottom: '8px' }}>Mapa FIIs</h2>
+            <p style={{ fontSize: '14px', color: '#64748b', lineHeight: 1.6, marginBottom: '20px' }}>
+              Visualização interativa dos imóveis físicos de Fundos de Investimento Imobiliário listados na B3.
+              Os dados são extraídos diretamente dos informes trimestrais enviados à CVM e atualizados semanalmente.
+            </p>
+
+            <div style={{ background: '#f8fafc', borderRadius: '10px', padding: '16px', marginBottom: '20px' }}>
+              <div style={{ fontSize: '12px', fontWeight: 600, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '10px' }}>Fonte de dados</div>
+              <a href="https://dados.cvm.gov.br/dataset/fii-doc-inf_trimestral" target="_blank" rel="noreferrer"
+                style={{ fontSize: '13px', color: '#2563eb', textDecoration: 'none' }}>
+                CVM — Informe Trimestral de FII ↗
+              </a>
+            </div>
+
+            <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '20px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#0f172a', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px' }}>👨‍💻</div>
+              <div>
+                <div style={{ fontSize: '14px', fontWeight: 600, color: '#0f172a' }}>Gabriel Machado</div>
+                <a href="https://github.com/ogabrielmachado" target="_blank" rel="noreferrer"
+                  style={{ fontSize: '13px', color: '#2563eb', textDecoration: 'none' }}>
+                  github.com/ogabrielmachado ↗
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
