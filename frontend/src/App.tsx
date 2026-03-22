@@ -7,6 +7,7 @@ import L from 'leaflet'
 import 'leaflet.markercluster'
 import { GeoSearchControl, OpenStreetMapProvider } from 'leaflet-geosearch'
 import FundoPage from './FundoPage'
+import { useNavigate, useParams, Routes, Route } from 'react-router-dom'
 import 'leaflet-geosearch/dist/geosearch.css'
 
 const API = 'https://fii-mapa-worker.gabrielmachado.workers.dev'
@@ -91,6 +92,14 @@ function MapEvents({ onChange }: { onChange: (bounds: string) => void }) {
   return null
 }
 
+
+function FundoPageWrapper() {
+  const { cnpj } = useParams<{ cnpj: string }>()
+  const navigate = useNavigate()
+  if (!cnpj) return null
+  return <FundoPage cnpj={decodeURIComponent(cnpj)} onVoltar={() => navigate('/')} />
+}
+
 export default function App() {
   const [imoveis, setImoveis]             = useState<Imovel[]>([])
   const [fundos, setFundos]               = useState<Fundo[]>([])
@@ -102,8 +111,8 @@ export default function App() {
   const [fundoDetalhe, setFundoDetalhe]   = useState<Fundo | null>(null)
   const [imoveisFundo, setImoveisFundo]   = useState<Imovel[]>([])
   const [menuAberto, setMenuAberto]       = useState(false)
+  const navigate = useNavigate()
   const [sobreAberto, setSobreAberto]     = useState(false)
-  const [fundoPageCnpj, setFundoPageCnpj]   = useState<string | null>(null)
   const [bounds, setBounds]               = useState('')
   const [avisoAberto, setAvisoAberto]       = useState(() => !localStorage.getItem('aviso_aceito'))
 
@@ -127,9 +136,10 @@ export default function App() {
       .then(r => r.json()).then(setImoveisFundo)
   }, [selecionado])
 
-  if (fundoPageCnpj) return <FundoPage cnpj={fundoPageCnpj} onVoltar={() => setFundoPageCnpj(null)} />
-
   return (
+    <Routes>
+      <Route path='/fundo/:cnpj' element={<FundoPageWrapper />} />
+      <Route path='/' element={
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', fontFamily: 'Inter, system-ui, sans-serif', background: '#f8fafc' }}>
 
       {/* Header */}
@@ -229,7 +239,7 @@ export default function App() {
             {fundoDetalhe && (
               <div style={{ padding: '16px', borderBottom: '1px solid #e2e8f0' }}>
                 <div style={{ fontSize: '11px', fontWeight: 600, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '10px' }}>Fundo</div>
-                <div onClick={() => setFundoPageCnpj(fundoDetalhe.cnpj)} style={{ fontSize: '13px', fontWeight: 600, color: '#2563eb', marginBottom: '4px', cursor: 'pointer' }}>{fundoDetalhe.nome} →</div>
+                <div onClick={() => navigate(`/fundo/${encodeURIComponent(fundoDetalhe.cnpj)}`)} style={{ fontSize: '13px', fontWeight: 600, color: '#2563eb', marginBottom: '4px', cursor: 'pointer' }}>{fundoDetalhe.nome} →</div>
                 <div style={{ fontSize: '12px', color: '#94a3b8' }}>{fundoDetalhe.cnpj}</div>
               </div>
             )}
@@ -305,5 +315,7 @@ export default function App() {
       )}
 
     </div>
+      } />
+    </Routes>
   )
 }
