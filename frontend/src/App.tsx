@@ -32,18 +32,7 @@ function criarIcone(tipo: string) {
   return L.divIcon({ html: svg, className: '', iconSize: [24, 36], iconAnchor: [12, 36], popupAnchor: [0, -36] })
 }
 
-type Imovel = {
-  id: number
-  descricao: string
-  endereco: string
-  tipo: string
-  area_m2: number
-  lat: number
-  lon: number
-  fundo_nome: string
-  cnpj: string
-}
-
+type Imovel = { id: number; descricao: string; endereco: string; tipo: string; area_m2: number; lat: number; lon: number; fundo_nome: string; cnpj: string }
 type Fundo = { cnpj: string; nome: string }
 type Stats = { total_imoveis: number; total_fundos: number; com_coords: number }
 
@@ -70,16 +59,8 @@ function SearchControl() {
   useEffect(() => {
     const provider = new OpenStreetMapProvider({ params: { countrycodes: 'br', addressdetails: 1 } })
     const search = GeoSearchControl({
-      provider,
-      style: 'bar',
-      placeholder: 'Buscar endereço...',
-      showMarker: true,
-      showPopup: false,
-      autoClose: true,
-      retainZoomLevel: false,
-      animateZoom: true,
-      keepResult: false,
-      searchLabel: 'Buscar',
+      provider, style: 'bar', placeholder: 'Buscar endereço...', showMarker: true,
+      showPopup: false, autoClose: true, retainZoomLevel: false, animateZoom: true, keepResult: false, searchLabel: 'Buscar',
     })
     map.addControl(search)
     return () => { map.removeControl(search) }
@@ -88,17 +69,18 @@ function SearchControl() {
 }
 
 export default function App() {
-  const [imoveis, setImoveis]         = useState<Imovel[]>([])
-  const [fundos, setFundos]           = useState<Fundo[]>([])
-  const [tipos, setTipos]             = useState<string[]>([])
-  const [stats, setStats]             = useState<Stats | null>(null)
-  const [filtroFundo, setFiltroFundo] = useState('')
-  const [filtroTipo, setFiltroTipo]   = useState('')
-  const [selecionado, setSelecionado] = useState<Imovel | null>(null)
-  const [fundoDetalhe, setFundoDetalhe] = useState<Fundo | null>(null)
-  const [imoveisFundo, setImoveisFundo] = useState<Imovel[]>([])
-  const [menuAberto, setMenuAberto]   = useState(false)
-  const [sobreAberto, setSobreAberto] = useState(false)
+  const [imoveis, setImoveis]             = useState<Imovel[]>([])
+  const [fundos, setFundos]               = useState<Fundo[]>([])
+  const [tipos, setTipos]                 = useState<string[]>([])
+  const [stats, setStats]                 = useState<Stats | null>(null)
+  const [filtroFundo, setFiltroFundo]     = useState('')
+  const [filtroTipo, setFiltroTipo]       = useState('')
+  const [selecionado, setSelecionado]     = useState<Imovel | null>(null)
+  const [fundoDetalhe, setFundoDetalhe]   = useState<Fundo | null>(null)
+  const [imoveisFundo, setImoveisFundo]   = useState<Imovel[]>([])
+  const [menuAberto, setMenuAberto]       = useState(false)
+  const [sobreAberto, setSobreAberto]     = useState(false)
+  const [avisoAberto, setAvisoAberto]       = useState(() => !localStorage.getItem('aviso_aceito'))
 
   useEffect(() => {
     fetch(`${API}/fundos`).then(r => r.json()).then(setFundos)
@@ -124,13 +106,10 @@ export default function App() {
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', fontFamily: 'Inter, system-ui, sans-serif', background: '#f8fafc' }}>
 
       {/* Header */}
-      <div style={{ background: 'white', borderBottom: '1px solid #e2e8f0', padding: '10px 16px', display: 'flex', alignItems: 'center', gap: '12px', zIndex: 1000, flexWrap: 'wrap' }}>
+      <div style={{ background: 'white', borderBottom: '1px solid #e2e8f0', padding: '10px 16px', display: 'flex', alignItems: 'center', gap: '12px', zIndex: 1000 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1 }}>
           <span style={{ fontSize: '20px' }}>🗺️</span>
-          <div>
-            <strong style={{ fontSize: '15px', color: '#0f172a' }}>Mapa FIIs</strong>
-            <span style={{ fontSize: '11px', color: '#94a3b8', marginLeft: '6px', display: 'none' }} className="desktop-only">Imóveis de Fundos Imobiliários</span>
-          </div>
+          <strong style={{ fontSize: '15px', color: '#0f172a' }}>Mapa FIIs</strong>
           {stats && (
             <div style={{ display: 'flex', gap: '12px', marginLeft: '8px' }}>
               <div style={{ textAlign: 'center' }}>
@@ -145,15 +124,18 @@ export default function App() {
           )}
         </div>
 
-        {/* Botão filtros mobile */}
-        <button
-          onClick={() => setMenuAberto(!menuAberto)}
+        <button onClick={() => setMenuAberto(!menuAberto)}
           style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', background: menuAberto ? '#f1f5f9' : 'white', cursor: 'pointer', fontSize: '13px', color: '#334155' }}>
-          ⓘ Sobre {(filtroFundo || filtroTipo) && <span style={{ background: '#2563eb', color: 'white', borderRadius: '99px', padding: '1px 6px', fontSize: '10px' }}>●</span>}
+          ⚙️ Filtros {(filtroFundo || filtroTipo) && <span style={{ background: '#2563eb', color: 'white', borderRadius: '99px', padding: '1px 6px', fontSize: '10px' }}>●</span>}
+        </button>
+
+        <button onClick={() => setSobreAberto(true)}
+          style={{ padding: '6px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', background: 'white', cursor: 'pointer', fontSize: '13px', color: '#334155' }}>
+          ℹ️ Sobre
         </button>
       </div>
 
-      {/* Painel de filtros — expansível */}
+      {/* Painel de filtros */}
       {menuAberto && (
         <div style={{ background: 'white', borderBottom: '1px solid #e2e8f0', padding: '10px 16px', display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
           <select value={filtroFundo} onChange={e => setFiltroFundo(e.target.value)}
@@ -161,20 +143,17 @@ export default function App() {
             <option value=''>Todos os fundos</option>
             {fundos.map(f => <option key={f.cnpj} value={f.cnpj}>{f.nome}</option>)}
           </select>
-
           <select value={filtroTipo} onChange={e => setFiltroTipo(e.target.value)}
             style={{ padding: '6px 10px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '13px', color: '#334155', background: 'white', flex: 1, minWidth: '160px' }}>
             <option value=''>Todos os tipos</option>
             {tipos.map(t => <option key={t} value={t}>{t}</option>)}
           </select>
-
           {(filtroFundo || filtroTipo) && (
             <button onClick={() => { setFiltroFundo(''); setFiltroTipo('') }}
               style={{ padding: '6px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '13px', color: '#64748b', background: 'white', cursor: 'pointer' }}>
               Limpar
             </button>
           )}
-
           <span style={{ fontSize: '12px', color: '#94a3b8', marginLeft: 'auto' }}>{imoveis.length} no mapa</span>
         </div>
       )}
@@ -202,37 +181,23 @@ export default function App() {
           <ClusterLayer imoveis={imoveis} onSelect={(im) => { setSelecionado(im); setMenuAberto(false) }} />
         </MapContainer>
 
-        {/* Painel lateral — ocupa tela toda no mobile */}
+        {/* Painel lateral */}
         {selecionado && (
-          <div style={{
-            position: 'absolute', right: 0, top: 0, bottom: 0,
-            width: 'min(340px, 100%)',
-            background: 'white', borderLeft: '1px solid #e2e8f0',
-            overflowY: 'auto', zIndex: 999,
-            boxShadow: '-4px 0 20px rgba(0,0,0,0.08)'
-          }}>
+          <div style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: 'min(340px, 100%)', background: 'white', borderLeft: '1px solid #e2e8f0', overflowY: 'auto', zIndex: 999, boxShadow: '-4px 0 20px rgba(0,0,0,0.08)' }}>
             <div style={{ padding: '16px', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
               <div>
                 <div style={{ fontSize: '14px', fontWeight: 600, color: '#0f172a', marginBottom: '6px' }}>{selecionado.descricao}</div>
-                <div style={{ display: 'inline-block', padding: '2px 8px', borderRadius: '99px', fontSize: '11px', fontWeight: 500,
-                  background: corPorTipo(selecionado.tipo) + '18', color: corPorTipo(selecionado.tipo) }}>
+                <div style={{ display: 'inline-block', padding: '2px 8px', borderRadius: '99px', fontSize: '11px', fontWeight: 500, background: corPorTipo(selecionado.tipo) + '18', color: corPorTipo(selecionado.tipo) }}>
                   {selecionado.tipo?.replace('Imóveis para ', '') || 'Sem tipo'}
                 </div>
               </div>
-              <button onClick={() => setSelecionado(null)}
-                style={{ background: 'none', border: 'none', fontSize: '22px', cursor: 'pointer', color: '#94a3b8', lineHeight: 1 }}>×</button>
+              <button onClick={() => setSelecionado(null)} style={{ background: 'none', border: 'none', fontSize: '22px', cursor: 'pointer', color: '#94a3b8', lineHeight: 1 }}>×</button>
             </div>
-
             <div style={{ padding: '16px', borderBottom: '1px solid #e2e8f0' }}>
               <div style={{ fontSize: '11px', fontWeight: 600, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '10px' }}>Imóvel</div>
-              <div style={{ display: 'flex', gap: '8px', marginBottom: '8px', fontSize: '13px', color: '#334155' }}>
-                <span>📍</span><span>{selecionado.endereco || '—'}</span>
-              </div>
-              <div style={{ display: 'flex', gap: '8px', fontSize: '13px', color: '#334155' }}>
-                <span>📐</span><span>{selecionado.area_m2 ? `${Number(selecionado.area_m2).toLocaleString('pt-BR')} m²` : '—'}</span>
-              </div>
+              <div style={{ display: 'flex', gap: '8px', marginBottom: '8px', fontSize: '13px', color: '#334155' }}><span>📍</span><span>{selecionado.endereco || '—'}</span></div>
+              <div style={{ display: 'flex', gap: '8px', fontSize: '13px', color: '#334155' }}><span>📐</span><span>{selecionado.area_m2 ? `${Number(selecionado.area_m2).toLocaleString('pt-BR')} m²` : '—'}</span></div>
             </div>
-
             {fundoDetalhe && (
               <div style={{ padding: '16px', borderBottom: '1px solid #e2e8f0' }}>
                 <div style={{ fontSize: '11px', fontWeight: 600, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '10px' }}>Fundo</div>
@@ -240,12 +205,9 @@ export default function App() {
                 <div style={{ fontSize: '12px', color: '#94a3b8' }}>{fundoDetalhe.cnpj}</div>
               </div>
             )}
-
             {imoveisFundo.length > 1 && (
               <div style={{ padding: '16px' }}>
-                <div style={{ fontSize: '11px', fontWeight: 600, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '10px' }}>
-                  Outros imóveis do fundo ({imoveisFundo.length - 1})
-                </div>
+                <div style={{ fontSize: '11px', fontWeight: 600, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '10px' }}>Outros imóveis do fundo ({imoveisFundo.length - 1})</div>
                 {imoveisFundo.filter(im => im.id !== selecionado.id).map(im => (
                   <div key={im.id} onClick={() => setSelecionado(im)}
                     style={{ padding: '10px', borderRadius: '8px', marginBottom: '6px', cursor: 'pointer', border: '1px solid #e2e8f0', fontSize: '12px', color: '#334155' }}
@@ -261,42 +223,51 @@ export default function App() {
         )}
       </div>
 
+
+      {/* Aviso legal */}
+      {avisoAberto && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 99999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+          <div style={{ background: 'white', borderRadius: '16px', padding: '32px', maxWidth: '480px', width: '100%', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' }}>
+            <div style={{ fontSize: '28px', marginBottom: '16px' }}>⚠️</div>
+            <h2 style={{ fontSize: '18px', fontWeight: 600, color: '#0f172a', marginBottom: '16px' }}>Atenção</h2>
+            <p style={{ fontSize: '14px', color: '#475569', lineHeight: 1.7, marginBottom: '24px' }}>
+              As informações constantes neste site são de origem da CVM. A responsabilidade pelos dados é de cada fundo imobiliário.
+              Os endereços foram geocodificados de acordo com os dados recebidos.
+              O <strong>Mapa FIIs</strong> não se responsabiliza por eventuais divergências.
+            </p>
+            <button
+              onClick={() => { localStorage.setItem('aviso_aceito', '1'); setAvisoAberto(false) }}
+              style={{ width: '100%', padding: '12px', borderRadius: '10px', border: 'none', background: '#0f172a', color: 'white', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}>
+              Entendi, continuar
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Modal Sobre */}
       {sobreAberto && (
-        <div onClick={() => setSobreAberto(false)} style={{
-          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)',
-          zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px'
-        }}>
-          <div onClick={e => e.stopPropagation()} style={{
-            background: 'white', borderRadius: '16px', padding: '32px',
-            maxWidth: '420px', width: '100%', boxShadow: '0 20px 60px rgba(0,0,0,0.15)'
-          }}>
+        <div onClick={() => setSobreAberto(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+          <div onClick={e => e.stopPropagation()} style={{ background: 'white', borderRadius: '16px', padding: '32px', maxWidth: '420px', width: '100%', boxShadow: '0 20px 60px rgba(0,0,0,0.15)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
               <div style={{ fontSize: '24px' }}>🗺️</div>
-              <button onClick={() => setSobreAberto(false)}
-                style={{ background: 'none', border: 'none', fontSize: '22px', cursor: 'pointer', color: '#94a3b8' }}>×</button>
+              <button onClick={() => setSobreAberto(false)} style={{ background: 'none', border: 'none', fontSize: '22px', cursor: 'pointer', color: '#94a3b8' }}>×</button>
             </div>
-
             <h2 style={{ fontSize: '20px', fontWeight: 600, color: '#0f172a', marginBottom: '8px' }}>Mapa FIIs</h2>
             <p style={{ fontSize: '14px', color: '#64748b', lineHeight: 1.6, marginBottom: '20px' }}>
               Visualização interativa dos imóveis físicos de Fundos de Investimento Imobiliário listados na B3.
-              Os dados são extraídos diretamente dos informes trimestrais enviados à CVM e atualizados semanalmente.
+              Os dados são extraídos dos informes trimestrais enviados à CVM e atualizados semanalmente.
             </p>
-
             <div style={{ background: '#f8fafc', borderRadius: '10px', padding: '16px', marginBottom: '20px' }}>
               <div style={{ fontSize: '12px', fontWeight: 600, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '10px' }}>Fonte de dados</div>
-              <a href="https://dados.cvm.gov.br/dataset/fii-doc-inf_trimestral" target="_blank" rel="noreferrer"
-                style={{ fontSize: '13px', color: '#2563eb', textDecoration: 'none' }}>
+              <a href="https://dados.cvm.gov.br/dataset/fii-doc-inf_trimestral" target="_blank" rel="noreferrer" style={{ fontSize: '13px', color: '#2563eb', textDecoration: 'none' }}>
                 CVM — Informe Trimestral de FII ↗
               </a>
             </div>
-
             <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '20px', display: 'flex', alignItems: 'center', gap: '12px' }}>
               <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#0f172a', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px' }}>👨‍💻</div>
               <div>
                 <div style={{ fontSize: '14px', fontWeight: 600, color: '#0f172a' }}>Gabriel Machado</div>
-                <a href="https://github.com/ogabrielmachado" target="_blank" rel="noreferrer"
-                  style={{ fontSize: '13px', color: '#2563eb', textDecoration: 'none' }}>
+                <a href="https://github.com/ogabrielmachado" target="_blank" rel="noreferrer" style={{ fontSize: '13px', color: '#2563eb', textDecoration: 'none' }}>
                   github.com/ogabrielmachado ↗
                 </a>
               </div>
@@ -304,6 +275,7 @@ export default function App() {
           </div>
         </div>
       )}
+
     </div>
   )
 }
