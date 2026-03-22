@@ -5,6 +5,7 @@ import 'leaflet.markercluster/dist/MarkerCluster.css'
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
 import L from 'leaflet'
 import 'leaflet.markercluster'
+import 'leaflet.heat'
 import { GeoSearchControl, OpenStreetMapProvider } from 'leaflet-geosearch'
 import FundoPage from './FundoPage'
 import { useNavigate, useParams, Routes, Route } from 'react-router-dom'
@@ -100,6 +101,25 @@ function FundoPageWrapper() {
   return <FundoPage cnpj={decodeURIComponent(cnpj)} onVoltar={() => navigate('/')} />
 }
 
+
+function HeatLayer({ imoveis }: { imoveis: Imovel[] }) {
+  const map = useMap()
+  useEffect(() => {
+    const points = imoveis
+      .filter(im => im.lat && im.lon)
+      .map(im => [im.lat, im.lon, 1] as [number, number, number])
+    const heat = (L as any).heatLayer(points, {
+      radius: 25,
+      blur: 20,
+      maxZoom: 10,
+      gradient: { 0.2: '#93c5fd', 0.5: '#3b82f6', 0.7: '#1d4ed8', 1.0: '#1e3a8a' }
+    })
+    heat.addTo(map)
+    return () => { map.removeLayer(heat) }
+  }, [imoveis])
+  return null
+}
+
 export default function App() {
   const [imoveis, setImoveis]             = useState<Imovel[]>([])
   const [fundos, setFundos]               = useState<Fundo[]>([])
@@ -112,6 +132,7 @@ export default function App() {
   const [imoveisFundo, setImoveisFundo]   = useState<Imovel[]>([])
   const [menuAberto, setMenuAberto]       = useState(false)
   const navigate = useNavigate()
+  const [heatmap, setHeatmap]             = useState(false)
   const [sobreAberto, setSobreAberto]     = useState(false)
   const [bounds, setBounds]               = useState('')
   const [avisoAberto, setAvisoAberto]       = useState(() => !localStorage.getItem('aviso_aceito'))
@@ -166,6 +187,11 @@ export default function App() {
           ⚙️ Filtros {(filtroFundo || filtroTipo) && <span style={{ background: '#2563eb', color: 'white', borderRadius: '99px', padding: '1px 6px', fontSize: '10px' }}>●</span>}
         </button>
 
+        <button onClick={() => setHeatmap(!heatmap)}
+          style={{ padding: '6px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', background: heatmap ? '#EFF6FF' : 'white', cursor: 'pointer', fontSize: '13px', color: heatmap ? '#1d4ed8' : '#334155' }}>
+          🔥 Heatmap
+        </button>
+
         <button onClick={() => setSobreAberto(true)}
           style={{ padding: '6px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', background: 'white', cursor: 'pointer', fontSize: '13px', color: '#334155' }}>
           ℹ️ Sobre
@@ -216,7 +242,8 @@ export default function App() {
           <TileLayer attribution='&copy; OpenStreetMap' url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'/>
           <SearchControl />
           <MapEvents onChange={setBounds} />
-          <ClusterLayer imoveis={imoveis} onSelect={(im) => { setSelecionado(im); setMenuAberto(false) }} />
+          {heatmap && <HeatLayer imoveis={imoveis} />}
+          {!heatmap && <ClusterLayer imoveis={imoveis} onSelect={(im) => { setSelecionado(im); setMenuAberto(false) }} />}
         </MapContainer>
 
         {/* Painel lateral */}
