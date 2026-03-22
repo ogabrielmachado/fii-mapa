@@ -69,6 +69,25 @@ app.get('/tipos', async (c) => {
   return c.json(results)
 })
 
+
+// Detalhes de um fundo específico
+app.get('/fundos/:cnpj', async (c) => {
+  const cnpj = c.req.param('cnpj')
+  const [fundo, stats] = await Promise.all([
+    c.env.DB.prepare('SELECT * FROM fundos WHERE cnpj = ?').bind(cnpj).first(),
+    c.env.DB.prepare(`
+      SELECT
+        COUNT(*) as total_imoveis,
+        COALESCE(SUM(area_m2), 0) as area_total,
+        COUNT(DISTINCT estado) as total_estados,
+        COUNT(DISTINCT tipo) as total_tipos
+      FROM imoveis WHERE cnpj_fundo = ?
+    `).bind(cnpj).first(),
+  ])
+  if (!fundo) return c.json({ error: 'Fundo não encontrado' }, 404)
+  return c.json({ ...fundo, ...stats })
+})
+
 export default app
 
 app.get('/stats', async (c) => {

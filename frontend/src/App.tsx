@@ -6,6 +6,7 @@ import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
 import L from 'leaflet'
 import 'leaflet.markercluster'
 import { GeoSearchControl, OpenStreetMapProvider } from 'leaflet-geosearch'
+import FundoPage from './FundoPage'
 import 'leaflet-geosearch/dist/geosearch.css'
 
 const API = 'https://fii-mapa-worker.gabrielmachado.workers.dev'
@@ -102,6 +103,7 @@ export default function App() {
   const [imoveisFundo, setImoveisFundo]   = useState<Imovel[]>([])
   const [menuAberto, setMenuAberto]       = useState(false)
   const [sobreAberto, setSobreAberto]     = useState(false)
+  const [fundoPageCnpj, setFundoPageCnpj]   = useState<string | null>(null)
   const [bounds, setBounds]               = useState('')
   const [avisoAberto, setAvisoAberto]       = useState(() => !localStorage.getItem('aviso_aceito'))
 
@@ -124,6 +126,8 @@ export default function App() {
     fetch(`${API}/fundos/${encodeURIComponent(selecionado.cnpj)}/imoveis`)
       .then(r => r.json()).then(setImoveisFundo)
   }, [selecionado])
+
+  if (fundoPageCnpj) return <FundoPage cnpj={fundoPageCnpj} onVoltar={() => setFundoPageCnpj(null)} />
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', fontFamily: 'Inter, system-ui, sans-serif', background: '#f8fafc' }}>
@@ -225,7 +229,7 @@ export default function App() {
             {fundoDetalhe && (
               <div style={{ padding: '16px', borderBottom: '1px solid #e2e8f0' }}>
                 <div style={{ fontSize: '11px', fontWeight: 600, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '10px' }}>Fundo</div>
-                <div style={{ fontSize: '13px', fontWeight: 600, color: '#0f172a', marginBottom: '4px' }}>{fundoDetalhe.nome}</div>
+                <div onClick={() => setFundoPageCnpj(fundoDetalhe.cnpj)} style={{ fontSize: '13px', fontWeight: 600, color: '#2563eb', marginBottom: '4px', cursor: 'pointer' }}>{fundoDetalhe.nome} →</div>
                 <div style={{ fontSize: '12px', color: '#94a3b8' }}>{fundoDetalhe.cnpj}</div>
               </div>
             )}
