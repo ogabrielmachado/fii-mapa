@@ -68,6 +68,28 @@ function SearchControl() {
   return null
 }
 
+
+function MapEvents({ onChange }: { onChange: (bounds: string) => void }) {
+  const map = useMap()
+  useEffect(() => {
+    const update = () => {
+      const b = map.getBounds()
+      const params = new URLSearchParams({
+        minLat: b.getSouth().toString(),
+        maxLat: b.getNorth().toString(),
+        minLon: b.getWest().toString(),
+        maxLon: b.getEast().toString(),
+      })
+      onChange(params.toString())
+    }
+    map.on('moveend', update)
+    map.on('zoomend', update)
+    update()
+    return () => { map.off('moveend', update); map.off('zoomend', update) }
+  }, [])
+  return null
+}
+
 export default function App() {
   const [imoveis, setImoveis]             = useState<Imovel[]>([])
   const [fundos, setFundos]               = useState<Fundo[]>([])
@@ -80,6 +102,7 @@ export default function App() {
   const [imoveisFundo, setImoveisFundo]   = useState<Imovel[]>([])
   const [menuAberto, setMenuAberto]       = useState(false)
   const [sobreAberto, setSobreAberto]     = useState(false)
+  const [bounds, setBounds]               = useState('')
   const [avisoAberto, setAvisoAberto]       = useState(() => !localStorage.getItem('aviso_aceito'))
 
   useEffect(() => {
@@ -89,11 +112,11 @@ export default function App() {
   }, [])
 
   useEffect(() => {
-    const params = new URLSearchParams()
+    const params = new URLSearchParams(bounds)
     if (filtroFundo) params.set('cnpj', filtroFundo)
     if (filtroTipo) params.set('tipo', filtroTipo)
     fetch(`${API}/imoveis?${params}`).then(r => r.json()).then(setImoveis)
-  }, [filtroFundo, filtroTipo])
+  }, [filtroFundo, filtroTipo, bounds])
 
   useEffect(() => {
     if (!selecionado) return
@@ -178,6 +201,7 @@ export default function App() {
         <MapContainer center={[-15.7801, -47.9292]} zoom={5} style={{ flex: 1, height: '100%' }} zoomControl={true}>
           <TileLayer attribution='&copy; OpenStreetMap' url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'/>
           <SearchControl />
+          <MapEvents onChange={setBounds} />
           <ClusterLayer imoveis={imoveis} onSelect={(im) => { setSelecionado(im); setMenuAberto(false) }} />
         </MapContainer>
 

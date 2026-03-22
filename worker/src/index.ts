@@ -43,7 +43,7 @@ app.get('/imoveis', async (c) => {
     params.push(cnpj)
   }
 
-  sql += ' LIMIT 500'
+  sql += ' LIMIT 50000'
 
   const { results } = await c.env.DB.prepare(sql).bind(...params).all()
   return c.json(results)
